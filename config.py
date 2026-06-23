@@ -28,7 +28,7 @@ EMBED_MODEL: str = os.getenv("RAG_EMBED_MODEL", "nomic-embed-text")
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 # --- Models (Gemini chat) ----------------------------------------------------
-GEMINI_MODEL: str = os.getenv("RAG_GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL: str = os.getenv("RAG_GEMINI_MODEL", "gemini-2.5-flash")
 GOOGLE_API_KEY: str | None = os.getenv("GOOGLE_API_KEY")
 
 # --- Models (Hugging Face embeddings) ----------------------------------------

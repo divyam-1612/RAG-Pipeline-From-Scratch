@@ -212,7 +212,7 @@ embeddings.
    RAG_LLM_PROVIDER = "gemini"
    RAG_EMBED_PROVIDER = "huggingface"
    GOOGLE_API_KEY = "your_google_api_key_here"
-   RAG_GEMINI_MODEL = "gemini-1.5-flash"
+   RAG_GEMINI_MODEL = "gemini-2.5-flash"
    RAG_HF_EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
    ```
 
