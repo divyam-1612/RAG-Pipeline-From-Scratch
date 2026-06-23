@@ -12,7 +12,6 @@ from typing import Iterable
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_chroma import Chroma
 
 import config
@@ -20,8 +19,29 @@ import config
 
 # --- Models ------------------------------------------------------------------
 @lru_cache(maxsize=1)
-def get_llm(temperature: float = 0.0) -> ChatOllama:
-    """Return a cached chat model. Temperature 0 for deterministic demos."""
+def get_llm(temperature: float = 0.0):
+    """Return a cached chat model based on ``config.LLM_PROVIDER``.
+
+    Temperature 0 for deterministic demos. Imports are lazy so that local
+    (Ollama) users don't need cloud SDKs installed, and vice versa.
+    """
+    provider = config.LLM_PROVIDER
+    if provider == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        if not config.GOOGLE_API_KEY:
+            raise RuntimeError(
+                "GOOGLE_API_KEY is not set. Add it to your environment or "
+                "Streamlit secrets to use the Gemini provider."
+            )
+        return ChatGoogleGenerativeAI(
+            model=config.GEMINI_MODEL,
+            google_api_key=config.GOOGLE_API_KEY,
+            temperature=temperature,
+        )
+
+    from langchain_ollama import ChatOllama
+
     return ChatOllama(
         model=config.CHAT_MODEL,
         base_url=config.OLLAMA_BASE_URL,
@@ -30,7 +50,16 @@ def get_llm(temperature: float = 0.0) -> ChatOllama:
 
 
 @lru_cache(maxsize=1)
-def get_embeddings() -> OllamaEmbeddings:
+def get_embeddings():
+    """Return a cached embeddings model based on ``config.EMBED_PROVIDER``."""
+    provider = config.EMBED_PROVIDER
+    if provider == "huggingface":
+        from langchain_huggingface import HuggingFaceEmbeddings
+
+        return HuggingFaceEmbeddings(model_name=config.HF_EMBED_MODEL)
+
+    from langchain_ollama import OllamaEmbeddings
+
     return OllamaEmbeddings(
         model=config.EMBED_MODEL,
         base_url=config.OLLAMA_BASE_URL,

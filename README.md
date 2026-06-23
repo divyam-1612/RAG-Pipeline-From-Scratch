@@ -186,7 +186,47 @@ variables above are picked up with no extra wiring. To turn tracing off, set
 
 ---
 
-## 7. Notes
+## 7. Deploy to Streamlit Community Cloud
+
+The app supports a **provider switch** so the same code runs locally on Ollama
+or in the cloud on hosted models:
+
+| Setting | Local | Cloud (Streamlit) |
+| --- | --- | --- |
+| `RAG_LLM_PROVIDER` | `ollama` | `gemini` |
+| `RAG_EMBED_PROVIDER` | `ollama` | `huggingface` |
+
+Streamlit Cloud cannot run Ollama, so deployment uses **Google Gemini** for
+chat and **Hugging Face** (`sentence-transformers`, runs in-process) for
+embeddings.
+
+**Steps:**
+
+1. Push this folder to a GitHub repo (already done).
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app** and
+   point it at your repo, branch `main`, main file `app.py`.
+3. In **Advanced settings → Secrets**, paste (see
+   `.streamlit/secrets.toml.example`):
+
+   ```toml
+   RAG_LLM_PROVIDER = "gemini"
+   RAG_EMBED_PROVIDER = "huggingface"
+   GOOGLE_API_KEY = "your_google_api_key_here"
+   RAG_GEMINI_MODEL = "gemini-1.5-flash"
+   RAG_HF_EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+   ```
+
+   Get a free Gemini key at
+   [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey).
+4. Click **Deploy**. First load is slower (it installs `torch`, downloads the
+   embedding model, and builds the Chroma index in ephemeral storage).
+
+`app.py` bridges Streamlit secrets into environment variables before importing
+`config`, so no extra wiring is needed. The real `secrets.toml` is git-ignored.
+
+---
+
+## 8. Notes
 
 - **Fully local:** no API keys required. Everything runs through Ollama.
 - **ColBERT** (`colbert.py`) optionally uses `ragatouille`; it prints setup

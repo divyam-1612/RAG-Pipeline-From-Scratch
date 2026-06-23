@@ -10,9 +10,19 @@ Run with:
 from __future__ import annotations
 
 import importlib
+import os
 import time
 
 import streamlit as st
+
+# Bridge Streamlit Cloud secrets -> environment variables *before* importing
+# config, so provider/model settings and API keys are picked up. Accessing
+# st.secrets is safe even when no secrets file exists.
+try:
+    for _k, _v in st.secrets.items():
+        os.environ.setdefault(_k, str(_v))
+except Exception:
+    pass
 
 import config
 from main import TECHNIQUES, run_core
@@ -97,16 +107,25 @@ def render_result(result: TechniqueResult) -> None:
 # --- Page setup --------------------------------------------------------------
 st.set_page_config(page_title="RAG From Scratch", page_icon="🔎", layout="wide")
 st.title("🔎 RAG From Scratch")
-st.caption("Local RAG techniques with Ollama + Chroma — based on the freeCodeCamp course.")
+st.caption("17+ advanced RAG techniques — based on the freeCodeCamp course.")
+
+# Active model labels depend on the configured provider.
+_chat_label = (
+    config.GEMINI_MODEL if config.LLM_PROVIDER == "gemini" else config.CHAT_MODEL
+)
+_embed_label = (
+    config.HF_EMBED_MODEL
+    if config.EMBED_PROVIDER == "huggingface"
+    else config.EMBED_MODEL
+)
 
 # --- Sidebar: config + status ------------------------------------------------
 with st.sidebar:
     st.header("Configuration")
     st.markdown(
         f"""
-- **Chat model:** `{config.CHAT_MODEL}`
-- **Embedding model:** `{config.EMBED_MODEL}`
-- **Ollama:** `{config.OLLAMA_BASE_URL}`
+- **Chat provider:** `{config.LLM_PROVIDER}` → `{_chat_label}`
+- **Embedding provider:** `{config.EMBED_PROVIDER}` → `{_embed_label}`
 - **Source URL:** {config.SOURCE_URL}
 - **Chunk size / overlap:** {config.CHUNK_SIZE} / {config.CHUNK_OVERLAP}
 - **Retrieval k:** {config.DEFAULT_K}
@@ -124,7 +143,10 @@ with st.sidebar:
         st.info("LangSmith tracing OFF (set LANGSMITH_TRACING=true in .env)")
 
     st.divider()
-    st.caption("Models run locally via Ollama. Make sure `ollama serve` is running.")
+    if config.LLM_PROVIDER == "gemini":
+        st.caption("Chat via Google Gemini; embeddings via Hugging Face.")
+    else:
+        st.caption("Models run locally via Ollama. Make sure `ollama serve` is running.")
 
 # --- Main controls -----------------------------------------------------------
 col_left, col_right = st.columns([1, 2])
@@ -151,7 +173,7 @@ with col_right:
 # --- Run ---------------------------------------------------------------------
 if run_clicked:
     q = question.strip() or None
-    with st.spinner(f"Running '{technique}' with {config.CHAT_MODEL}..."):
+    with st.spinner(f"Running '{technique}' with {_chat_label}..."):
         start = time.time()
         try:
             results = run_technique(technique, q)

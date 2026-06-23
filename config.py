@@ -16,10 +16,25 @@ except Exception:  # python-dotenv is optional at runtime
     pass
 
 
-# --- Models (Ollama) ---------------------------------------------------------
+# --- Providers ---------------------------------------------------------------
+# Chat: "ollama" (local) or "gemini" (Google Generative AI, cloud).
+# Embeddings: "ollama" (local) or "huggingface" (sentence-transformers, cloud).
+LLM_PROVIDER: str = os.getenv("RAG_LLM_PROVIDER", "ollama").lower()
+EMBED_PROVIDER: str = os.getenv("RAG_EMBED_PROVIDER", "ollama").lower()
+
+# --- Models (Ollama / local) -------------------------------------------------
 CHAT_MODEL: str = os.getenv("RAG_CHAT_MODEL", "llama3.2")
 EMBED_MODEL: str = os.getenv("RAG_EMBED_MODEL", "nomic-embed-text")
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+# --- Models (Gemini chat) ----------------------------------------------------
+GEMINI_MODEL: str = os.getenv("RAG_GEMINI_MODEL", "gemini-1.5-flash")
+GOOGLE_API_KEY: str | None = os.getenv("GOOGLE_API_KEY")
+
+# --- Models (Hugging Face embeddings) ----------------------------------------
+HF_EMBED_MODEL: str = os.getenv(
+    "RAG_HF_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+)
 
 # --- Data source -------------------------------------------------------------
 SOURCE_URL: str = os.getenv(
