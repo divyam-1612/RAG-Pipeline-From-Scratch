@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.local
+
+# Vector store (regenerated locally)
+.chroma/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
