@@ -1,0 +1,8 @@
+[server]
+# Disable the source file watcher. It otherwise walks every installed module
+# (including transformers' image processors), which spams ModuleNotFoundError
+# tracebacks for optional deps like torchvision that this app doesn't use.
+fileWatcherType = "none"
+
+[logger]
+level = "error"

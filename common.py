@@ -87,6 +87,27 @@ def split_documents(
 
 
 # --- Vector store ------------------------------------------------------------
+def _embed_tag() -> str:
+    """Short, filesystem-safe tag identifying the active embedding model.
+
+    Different embedding models produce vectors of different dimensions (e.g.
+    Ollama ``nomic-embed-text`` = 768, HF ``all-MiniLM-L6-v2`` = 384). Chroma
+    rejects writes whose dimension differs from the collection's, so the tag is
+    appended to collection names to keep providers isolated.
+    """
+    if config.EMBED_PROVIDER == "huggingface":
+        model = config.HF_EMBED_MODEL
+    else:
+        model = config.EMBED_MODEL
+    safe = model.rsplit("/", 1)[-1].replace("-", "_").replace(".", "_")
+    return f"{config.EMBED_PROVIDER}_{safe}"
+
+
+def scoped_collection_name(base: str) -> str:
+    """Return ``base`` suffixed with the active embedding tag."""
+    return f"{base}__{_embed_tag()}"
+
+
 def build_vectorstore(
     documents: list[Document] | None = None,
     collection_name: str = "rag_from_scratch",
@@ -99,6 +120,7 @@ def build_vectorstore(
     """
     embeddings = get_embeddings()
     persist_dir = str(config.CHROMA_DIR) if persist else None
+    collection_name = scoped_collection_name(collection_name)
 
     if documents is None:
         return Chroma(
