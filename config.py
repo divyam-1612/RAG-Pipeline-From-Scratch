@@ -11,7 +11,11 @@ from pathlib import Path
 try:
     from dotenv import load_dotenv
 
-    load_dotenv()
+    # Load the .env that lives next to this file, regardless of the current
+    # working directory. Without an explicit path, load_dotenv() only searches
+    # from the cwd, so running `streamlit run app.py` from another folder would
+    # silently fall back to the Ollama defaults.
+    load_dotenv(Path(__file__).resolve().parent / ".env")
 except Exception:  # python-dotenv is optional at runtime
     pass
 
